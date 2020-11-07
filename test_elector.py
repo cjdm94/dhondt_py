@@ -1,23 +1,12 @@
-class Party:
+import unittest
+from elector import Elector
+from party import Party
+from electionresult import ElectionResult
 
-    def __init__(self, name, num_votes, candidates):
-        self.name = name
-        self.votes_won = num_votes
-        self.candidates = candidates
-        self.quotient = num_votes
-        self.candidates_elected = []
-        self.seats_won = 0
-    
-    def allocate_seat(self):
-        self.candidates_elected.append(self.candidates[self.seats_won])
-        self.seats_won += 1
-        self.quotient = self.votes_won / (self.seats_won + 1)
-
-num_seats = 10
 parties = [
-    Party('Cons', 776370, [
+    Party("Cons", 776370, [
         "Daniel Hannan",
-		"Nirj Deva",
+        "Nirj Deva",
         "James Elles",
         "Richard Ashworth",
         "Roy Perry",
@@ -26,7 +15,7 @@ parties = [
         "Ferris Cowper",
         "Richard Robinson"
     ]),
-    Party('Green', 173351, [
+    Party("Green", 173351, [
         "Caroline Lucas",
         "Mike Woodin",
         "Miriam Kennet",
@@ -38,7 +27,7 @@ parties = [
         "nthony Cooper",
         "Michael Stimson"
     ]),
-    Party('Lab', 301398, [
+    Party("Lab", 301398, [
         "Peter Skinner",
         "Mark Watts",
         "Ann Davison",
@@ -50,7 +39,7 @@ parties = [
         "Gillian Roles",
         "David Menon"
     ]),
-    Party('Lib Dems', 338342, [
+    Party("Lib Dems", 338342, [
         "Chris Huhne",
         "Baroness Nicholson of Winterbourne",
         "Sharon Bowles",
@@ -62,7 +51,7 @@ parties = [
         "Charles Fraser-Fleming",
         "James Barnard"
     ]),
-    Party('UKIP', 431111, [
+    Party("UKIP", 431111, [
         "Nigel Farage",
         "Ashley Mote",
         "David Lott",
@@ -74,7 +63,7 @@ parties = [
         "Michael Wigley",
         "Lisa Hawkins"
     ]),
-    Party('BNP', 64877, [
+    Party("BNP", 64877, [
         "Brian Galloway",
         "Julie Russell",
         "Timothy Rait",
@@ -86,7 +75,7 @@ parties = [
         "Dennis Whiting",
         "Vernon Atkinson"
     ]),
-    Party('SCP', 42861, [
+    Party("SCP", 42861, [
         "Grahame Leon-Smith",
         "David Gray",
         "Patrick Eston",
@@ -98,7 +87,7 @@ parties = [
         "Ian Murdoch",
         "Alfred Egleton"
     ]),
-    Party('EngDem', 29126, [
+    Party("EngDem", 29126, [
         "Steven Uncles",
         "Robert Sulley",
         "Courtney Williams",
@@ -107,7 +96,7 @@ parties = [
         "David Uncles",
         "Louise Uncles"
     ]),
-    Party('Respect', 13426, [
+    Party("Respect", 13426, [
         "Patrick O'Keeffe",
         "Ingrid Dodd",
         "Muriel Hirsch",
@@ -119,7 +108,7 @@ parties = [
         "Bunny La Roche",
         "Angelina Rai"
     ]),
-    Party('Peace', 12572, [
+    Party("Peace", 12572, [
         "John Morris",
         "Caroline O'Reilly",
         "Geoffrey Pay",
@@ -130,12 +119,12 @@ parties = [
         "Carol Morris",
         "Anne Brewer"
     ]),
-    Party('Christian Peoples', 11733, [
+    Party("Christian Peoples", 11733, [
         "David John Bamber",
         "David Campanale",
         "Gladstone Macaulay"
     ]),
-    Party('Pro Life Alliance', 6579, [
+    Party("Pro Life Alliance", 6579, [
         "Dominica Roberts",
         "Gillian Duval",
         "Josephine Quintavalle",
@@ -147,17 +136,46 @@ parties = [
         "Yvonne Windsor",
         "Carl St John"
     ]),
-    Party('Independent', 5671, [
+    Party("Independent", 5671, [
         "Philip Rhodes"
-    ]),
+    ])
 ]
 
-for i in range(num_seats):
-    parties.sort(key=lambda x: x.quotient, reverse=True)
-    parties[0].allocate_seat()
+class TestElector(unittest.TestCase):
+    
+    def test_run_election(self):
+        self.maxDiff = None
 
-for x in parties:
-    print(x.name)
-    print(x.seats_won)
-    print(x.candidates_elected)
-    print(x.quotient)
+        elector = Elector(10)
+        actual = elector.run_election(parties)
+        expected = [
+            ElectionResult("Cons", 4, [
+                "Daniel Hannan",
+                "Nirj Deva",
+                "James Elles",
+                "Richard Ashworth"
+            ]),
+            ElectionResult("Lib Dems", 2, [
+                "Chris Huhne",
+                "Baroness Nicholson of Winterbourne",
+            ]),
+            ElectionResult("UKIP", 2, ["Nigel Farage", "Ashley Mote"]),
+            ElectionResult("Lab", 1, ["Peter Skinner"]),
+            ElectionResult("Green", 1, ["Caroline Lucas"]),
+            ElectionResult("BNP", 0, []),
+            ElectionResult("SCP", 0, []),
+            ElectionResult("EngDem", 0, []),
+            ElectionResult("Respect", 0, []),
+            ElectionResult("Peace", 0, []),
+            ElectionResult("Christian Peoples", 0, []),
+            ElectionResult("Pro Life Alliance", 0, []),
+            ElectionResult("Independent", 0, [])
+        ]
+
+        for idx,val in enumerate(actual):
+            self.assertEqual(val.party_name, expected[idx].party_name)
+            self.assertEqual(val.seats_won, expected[idx].seats_won)
+            self.assertSequenceEqual(val.candidates_elected, expected[idx].candidates_elected)
+
+if __name__ == "__main__":
+    unittest.main()
